@@ -9,7 +9,7 @@ int main()
 
 	window.setFramerateLimit(60);
 
-	Ant a1(Vector2d(window.getSize().x / 2, window.getSize().y / 2));
+	Ant a1(window);
 	sf::CircleShape circle(5);
 	circle.setFillColor(sf::Color(0, 255, 0, 255));
 

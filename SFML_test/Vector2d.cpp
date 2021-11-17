@@ -63,6 +63,13 @@ Vector2d Vector2d::operator-=(const Vector2d& v)
 	return *this;
 }
 
+Vector2d Vector2d::operator*=(float value)
+{
+	this->x *= value;
+	this->y *= value;
+	return *this;
+}
+
 float Vector2d::sqLength()
 {
 	return (this->x * this->x) + (this->y * this->y);
@@ -89,16 +96,6 @@ float Vector2d::dot(Vector2d& v)
 sf::Vector2f Vector2d::asSFMLVector2f()
 {
 	return sf::Vector2f(this->x, this->y);
-}
-
-float Vector2d::X()
-{
-	return x;
-}
-
-float Vector2d::Y()
-{
-	return y;
 }
 
 std::ostream& operator<<(std::ostream& out, const Vector2d& v)

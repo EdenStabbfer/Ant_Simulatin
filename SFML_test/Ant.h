@@ -12,6 +12,7 @@ private:
 	Vector2d position;
 	Vector2d dir;
 	Vector2d velocity;
+	Vector2d borders;
 	float speed;
 
 	void chooseDesiredDirection();
@@ -20,7 +21,7 @@ private:
 
 
 public:
-	Ant(Vector2d startPos, float speed = 1.f);
+	Ant(const sf::Window& w, float speed = 1.f);
 
 	void move(const float dt);
 

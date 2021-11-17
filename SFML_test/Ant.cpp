@@ -1,11 +1,16 @@
 #include "Ant.h"
 
 
-Ant::Ant(Vector2d startPos, float maxSpeed) : position(startPos), speed(maxSpeed) {}
+Ant::Ant(const sf::Window& w, float maxSpeed)
+{
+	this->speed = maxSpeed;
+	this->borders = Vector2d(w.getSize().x, w.getSize().y);
+	this->position = Vector2d(w.getSize().x / 2, w.getSize().y / 2);
+}
 
 void Ant::chooseDesiredDirection()
 {
-	this->dir = (this->dir + randomVectorInCircle() * wonderStrength).normalize();
+	dir = (dir + randomVectorInCircle() * wonderStrength).normalize();
 }
 
 void Ant::chooseSpecificDirection()
@@ -17,9 +22,21 @@ void Ant::move(const float dt)
 {	
 	this->chooseDesiredDirection();
 
-	Vector2d streeringForce = (this->dir * speed - this->velocity).normalize() * streeringStrength;
-	this->velocity = (velocity + streeringForce * dt).normalize() * speed;
-	this->position += this->velocity;
+	Vector2d streeringForce = (dir * speed - velocity).normalize() * streeringStrength;
+	velocity = (velocity + streeringForce * dt).normalize() * speed;
+	position += this->velocity;
+
+	if (position.x > borders.x || position.x < 0)
+	{
+		dir.x *= -1;
+		velocity.x *= -1;
+	}
+	if (position.y > borders.y || position.y < 0)
+	{
+		dir.y *= -1;
+		velocity.y *= -1;
+	}
+
 }
 
 Vector2d Ant::getPosition()
