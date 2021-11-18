@@ -1,11 +1,13 @@
 #include "Ant.h"
 
-
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(1280, 720), "Crazy Ants");
 	sf::Event event;
-	sf::Clock clock;
+	sf::Clock global_clock;
+	sf::Clock pheromoneTimer;
+
+	float pherLeaveTime = 500; // in milliseconds
 
 	window.setFramerateLimit(60);
 
@@ -21,7 +23,12 @@ int main()
 				window.close();
 		}
 		// Update
-		float dt = clock.restart().asSeconds();
+		float dt = global_clock.restart().asSeconds();
+		if (pheromoneTimer.getElapsedTime().asMilliseconds() > pherLeaveTime) {
+			pheromoneTimer.restart();
+
+		}
+
 		a1.move(dt);
 		circle.setPosition(a1.getPosition().asSFMLVector2f());
 

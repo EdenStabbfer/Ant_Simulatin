@@ -1,6 +1,8 @@
 #include <cmath>
+#include <random>
 
 #include "Vector2d.h"
+
 
 
 Vector2d::Vector2d(float xCord, float yCord)
@@ -101,6 +103,11 @@ sf::Vector2f Vector2d::asSFMLVector2f()
 std::ostream& operator<<(std::ostream& out, const Vector2d& v)
 {
 	return out << "Vector(" << v.x << ", " << v.y << ")";
+}
+
+Vector2d Vector2d::copy()
+{
+	return Vector2d(x, y);
 }
 
 // Random vector in circle

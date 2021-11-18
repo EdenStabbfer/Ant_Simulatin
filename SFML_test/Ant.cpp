@@ -1,13 +1,23 @@
+#include <vector>
+
 #include "Ant.h"
 
 
-Ant::Ant(const sf::Window& w, float maxSpeed)
+static std::vector<Ant::Pheromone> pheromones;
+
+// Initialization
+Ant::Ant(const sf::Window& w, float maxSpeed, float radiusOfView)
 {
 	this->speed = maxSpeed;
+	this->dir = randomVectorInCircle();
+	this->velocity = dir * maxSpeed;
 	this->borders = Vector2d(w.getSize().x, w.getSize().y);
 	this->position = Vector2d(w.getSize().x / 2, w.getSize().y / 2);
+	this->target = PheromoneType::TO_FOOD;
+	this->radiusOfView = radiusOfView;
 }
 
+// Methods
 void Ant::chooseDesiredDirection()
 {
 	dir = (dir + randomVectorInCircle() * wonderStrength).normalize();
@@ -42,4 +52,12 @@ void Ant::move(const float dt)
 Vector2d Ant::getPosition()
 {
 	return this->position;
+}
+
+void Ant::leavePheromone(float speed, float dt)
+{
+	if (target == TO_FOOD)
+		pheromones.emplace_back(TO_FOOD, 1.f, position.copy());
+	else
+		pheromones.emplace_back(TO_HOME, 1.f, position.copy());
 }

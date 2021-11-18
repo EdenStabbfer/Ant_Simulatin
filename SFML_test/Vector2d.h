@@ -1,10 +1,7 @@
 #pragma once
-
 #include <iostream>
-#include <random>
 
 #include <SFML/Graphics.hpp>
-
 
 class Vector2d
 {
@@ -40,6 +37,8 @@ public:
 	float dot(Vector2d& v);
 
 	sf::Vector2f asSFMLVector2f();
+
+	Vector2d copy();
 };
 
 Vector2d randomVectorInCircle();
