@@ -1,5 +1,7 @@
 #pragma once
+
 #include <iostream>
+#include <random>
 
 #include <SFML/Graphics.hpp>
 
@@ -29,15 +31,13 @@ public:
 	friend std::ostream& operator<< (std::ostream& out, const Vector2d& v);
 
 	float sqLength();
-
 	float length();
-
+	float distanceTo(Vector2d& v);
+	float distanceTo(float x, float y);
+	Vector2d VectorTo(float x, float y);
 	Vector2d& normalize();
-
 	float dot(Vector2d& v);
-
 	sf::Vector2f asSFMLVector2f();
-
 	Vector2d copy();
 };
 

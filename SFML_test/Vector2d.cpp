@@ -1,5 +1,4 @@
 #include <cmath>
-#include <random>
 
 #include "Vector2d.h"
 
@@ -82,6 +81,21 @@ float Vector2d::length()
 	return sqrt(sqLength());
 }
 
+float Vector2d::distanceTo(Vector2d& v)
+{
+	return sqrt(pow(v.x - this->x, 2) + pow(v.y - this->y, 2));
+}
+
+float Vector2d::distanceTo(float x, float y)
+{
+	return sqrt(pow(x - this->x, 2) + pow(y - this->y, 2));
+}
+
+Vector2d Vector2d::VectorTo(float x, float y)
+{
+	return Vector2d(x - this->x, y - this->y);
+}
+
 Vector2d& Vector2d::normalize()
 {
 	float len = this->length();
@@ -111,12 +125,11 @@ Vector2d Vector2d::copy()
 }
 
 // Random vector in circle
-static std::random_device rd;
-static std::mt19937 gen(rd());
-static std::uniform_real_distribution<> uid(-1, 1);
-
 Vector2d randomVectorInCircle()
 {
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	static std::uniform_real_distribution<> uid(-1, 1);
 	return Vector2d(uid(gen), uid(gen)).normalize();
 }
 

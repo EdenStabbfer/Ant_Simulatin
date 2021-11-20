@@ -25,6 +25,7 @@ int main()
 		// Update
 		float dt = global_clock.restart().asSeconds();
 		if (pheromoneTimer.getElapsedTime().asMilliseconds() > pherLeaveTime) {
+			a1.leavePheromone();
 			pheromoneTimer.restart();
 
 		}
