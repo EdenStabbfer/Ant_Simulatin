@@ -2,8 +2,6 @@
 
 #include "Ant.h"
 
-std::vector<Ant::Pheromone> pheromones;
-
 // Initialization
 Ant::Ant(const sf::Window& w, float maxSpeed)
 {
@@ -21,18 +19,14 @@ void Ant::chooseDesiredDirection()
 	desiredDir = (desiredDir + randomVectorInCircle() * wonderStrength).normalize();
 }
 
-void Ant::chooseSpecificDirection(const float& dt)
+void Ant::chooseDirection(std::vector<Pheromone>& pheromones, const float& dt, sf::Clock& timer, const float& period)
 {
 	static std::vector<std::reference_wrapper<Pheromone>> phAround;
 	static std::vector<float> probability{};
 
-	static std::random_device rd;
-	static std::mt19937 gen(rd());
-	static std::uniform_real_distribution<> uid(0, 1);
-
 	float probabilitySum(0);
 	float oneProb(0);
-
+	bool isAnyWithin(false);
 	for (auto& ph : pheromones)
 	{
 		if (ph.type == this->target)
@@ -42,6 +36,7 @@ void Ant::chooseSpecificDirection(const float& dt)
 			{
 				if (dist < antSize)
 				{
+					isAnyWithin = true;
 					ph.value += pheromoneUpdateRatio / (speed * dt);
 					continue;
 				}
@@ -53,27 +48,39 @@ void Ant::chooseSpecificDirection(const float& dt)
 		}
 	}
 
-	float chance = uid(gen);
-
-	for (int i = 0; i < probability.size(); i++)
+	if (!isAnyWithin && timer.getElapsedTime().asSeconds() >= period)
 	{
-		if (chance <= probability.at(i) / probabilitySum)
+		leavePheromone(pheromones);
+		timer.restart();
+	}
+	
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	static std::uniform_real_distribution<> uid(0, 1);
+	int x, y;
+	if (!probability.empty())
+	{
+		float chance = uid(gen);
+		for (int i = 0; i < probability.size(); i++)
 		{
-			int x = std::remove_reference<Pheromone&>::type(phAround.at(i)).x;
-			int y = std::remove_reference<Pheromone&>::type(phAround.at(i)).y;
-			this->desiredDir = this->desiredDir.VectorTo(x, y);
-			break;
+			if (chance <= probability.at(i) / probabilitySum)
+			{
+				x = std::remove_reference<Pheromone&>::type(phAround.at(i)).x;
+				y = std::remove_reference<Pheromone&>::type(phAround.at(i)).y;
+				this->desiredDir = this->desiredDir.VectorTo(x, y).normalize();
+				break;
+			}
 		}
 	}
-
+	else
+		chooseDesiredDirection();
 	probability.clear();
 	phAround.clear();
 }
 
-void Ant::move(const float dt)
+void Ant::move(std::vector<Pheromone>& ph, const float& dt, sf::Clock& timer, const float& period)
 {	
-	chooseDesiredDirection();
-	chooseSpecificDirection();
+	chooseDirection(ph, dt, timer, period);
 	//добавить испарение
 
 	Vector2d streeringForce = (desiredDir * speed - velocity).normalize() * streeringStrength;
@@ -98,10 +105,10 @@ Vector2d Ant::getPosition()
 	return this->position;
 }
 
-void Ant::leavePheromone()
+void Ant::leavePheromone(std::vector<Pheromone>& ph)
 {
 	if (target == TO_FOOD)
-		pheromones.emplace_back(TO_HOME, 1.f, position.x, position.y);
+		ph.emplace_back(TO_HOME, 1.f, position.x, position.y);
 	else
-		pheromones.emplace_back(TO_FOOD, 1.f, position.x, position.y);
+		ph.emplace_back(TO_FOOD, 1.f, position.x, position.y);
 }

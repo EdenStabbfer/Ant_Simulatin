@@ -7,13 +7,15 @@ int main()
 	sf::Clock global_clock;
 	sf::Clock pheromoneTimer;
 
-	float pherLeaveTime = 500; // in milliseconds
+	float pherLeaveTime = 0.5; // in seconds
 
 	window.setFramerateLimit(60);
 
 	Ant a1(window);
 	sf::CircleShape circle(5);
 	circle.setFillColor(sf::Color(0, 255, 0, 255));
+
+	std::vector<Ant::Pheromone> pheromones;
 
 	while (window.isOpen())
 	{
@@ -24,19 +26,21 @@ int main()
 		}
 		// Update
 		float dt = global_clock.restart().asSeconds();
-		if (pheromoneTimer.getElapsedTime().asMilliseconds() > pherLeaveTime) {
-			a1.leavePheromone();
-			pheromoneTimer.restart();
 
-		}
-
-		a1.move(dt);
+		a1.move(pheromones, dt, pheromoneTimer, pherLeaveTime);
 		circle.setPosition(a1.getPosition().asSFMLVector2f());
 
 		// Draw
 		window.clear(sf::Color(0, 0, 0, 0));
 
 		window.draw(circle);
+		for (auto& ph : pheromones)
+		{
+			sf::CircleShape c(1);
+			c.setFillColor(sf::Color(0, 0, 255, 255));
+			c.setPosition(ph.x, ph.y);
+			window.draw(c);
+		}
 
 		window.display();
 	}

@@ -48,12 +48,12 @@ private:
 
 	void chooseDesiredDirection();
 
-	void chooseSpecificDirection(const float& dt);
+	void chooseDirection(std::vector<Pheromone>& ph, const float& dt, sf::Clock& timer, const float& period);
 
 public:
-	void move(const float dt);
+	void move(std::vector<Pheromone>& ph, const float& dt, sf::Clock& timer, const float& period);
 
-	void leavePheromone();
+	void leavePheromone(std::vector<Pheromone>& ph);
 
 	Vector2d getPosition();
 };
