@@ -81,7 +81,7 @@ float Vector2d::length()
 	return sqrt(sqLength());
 }
 
-float Vector2d::distanceTo(Vector2d& v)
+float Vector2d::distanceTo(const Vector2d& v)
 {
 	return sqrt(pow(v.x - this->x, 2) + pow(v.y - this->y, 2));
 }
@@ -94,6 +94,11 @@ float Vector2d::distanceTo(float x, float y)
 Vector2d Vector2d::VectorTo(float x, float y)
 {
 	return Vector2d(x - this->x, y - this->y);
+}
+
+Vector2d Vector2d::VectorTo(const Vector2d& v)
+{
+	return Vector2d(v.x - this->x, v.y - this->y);
 }
 
 Vector2d& Vector2d::normalize()

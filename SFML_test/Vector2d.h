@@ -32,8 +32,9 @@ public:
 
 	float sqLength();
 	float length();
-	float distanceTo(Vector2d& v);
+	float distanceTo(const Vector2d& v);
 	float distanceTo(float x, float y);
+	Vector2d VectorTo(const Vector2d& v);
 	Vector2d VectorTo(float x, float y);
 	Vector2d& normalize();
 	float dot(Vector2d& v);
