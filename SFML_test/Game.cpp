@@ -15,7 +15,7 @@ int main()
 	window.setFramerateLimit(Config::frameRate);
 
 	std::vector<Ant::Pheromone> pheromones;
-	Ant ants[10];
+	Ant ants[1];
 
 	Vector2d food(100.f, 100.f);
 	sf::CircleShape foodShape(20);
@@ -66,7 +66,7 @@ int main()
 			if (ph.type == Ant::TO_HOME)
 				c.setFillColor(sf::Color(0, 0, 255, static_cast<int>(min(ph.value, 1.f)*255)));
 			else
-				c.setFillColor(sf::Color(255, 0, 0));
+				c.setFillColor(sf::Color(255, 0, 0, static_cast<int>(min(ph.value, 1.f) * 255)));
 			window.draw(c);
 			ph.value *= 1 - Config::pheromoneEvaporationRate;
 		}

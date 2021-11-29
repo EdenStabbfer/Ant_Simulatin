@@ -7,7 +7,7 @@
 class Ant
 {
 public:
-	Ant(float maxSpeed = 1.f);
+	Ant(float maxSpeed = 1.6f);
 
 	enum PheromoneType
 	{

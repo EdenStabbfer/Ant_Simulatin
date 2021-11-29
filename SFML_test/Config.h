@@ -7,18 +7,18 @@ namespace Config
 	const int height = 720;
 
 	// Time
-	const float phUpdateTime = 0.33; // in seconds
-	const int frameRate = 60;
+	const float phUpdateTime = 0.5; // in seconds
+	const int frameRate = 30;
 
 	// Ant
-	const float wonderStrength(12.f);
-	const float streeringStrength(8.f);
-	const float radiusOfView(20.f);
-	const float antSize(10.f);
+	const float wonderStrength(8.f);
+	const float streeringStrength(10.f);
+	const float radiusOfView(50.f);
+	const float antSize(8.f);
 
 	// Pheromones
 	const float pheromoneEvaporationRate(0.001);
 	const float pheromoneUpdateRate(0.01);
-	const int distanceStrength(5);
-	const int pheromoneStrength(3);
+	const int distanceStrength(3);
+	const int pheromoneStrength(5);
 }

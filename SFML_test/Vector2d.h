@@ -32,13 +32,22 @@ public:
 
 	float sqLength();
 	float length();
+
 	float distanceTo(const Vector2d& v);
 	float distanceTo(float x, float y);
+
 	Vector2d VectorTo(const Vector2d& v);
 	Vector2d VectorTo(float x, float y);
+
+	float angleTo(const Vector2d& v);
+	float angleTo(float x, float y);
+
 	Vector2d& normalize();
+
 	float dot(Vector2d& v);
+
 	sf::Vector2f asSFMLVector2f();
+
 	Vector2d copy();
 };
 
