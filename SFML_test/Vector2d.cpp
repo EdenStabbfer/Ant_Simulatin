@@ -96,6 +96,11 @@ Vector2d Vector2d::VectorTo(float x, float y)
 	return Vector2d(x - this->x, y - this->y);
 }
 
+Vector2d Vector2d::VectorTo(const Vector2d& v)
+{
+	return Vector2d(v.x - this->x, v.y - this->y);
+}
+
 float Vector2d::angleTo(const Vector2d& v)
 {
 	float t = (v.x * this->x + v.y * this->y) / this->length() / sqrt(v.x * v.x + v.y * v.y);
@@ -110,11 +115,6 @@ float Vector2d::angleTo(float x, float y)
 	if (t < -1) t = -1;
 	else if (t > 1) t = 1;
 	return acos(t);
-}
-
-Vector2d Vector2d::VectorTo(const Vector2d& v)
-{
-	return Vector2d(v.x - this->x, v.y - this->y);
 }
 
 Vector2d& Vector2d::normalize()

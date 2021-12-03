@@ -7,7 +7,7 @@
 class Ant
 {
 public:
-	Ant(float maxSpeed = 1.6f);
+	Ant(float maxSpeed = 45.f);
 
 	enum PheromoneType
 	{
@@ -22,8 +22,8 @@ public:
 		float x;
 		float y;
 
-		Pheromone(PheromoneType type, float value, float x, float y) :
-			type(type), value(value), x(x), y(y){}
+		Pheromone(PheromoneType p_type, float p_value, float p_x, float p_y) :
+			type(p_type), value(p_value), x(p_x), y(p_y){}
 	};
 
 private:
@@ -44,6 +44,8 @@ public:
 	void move(const float& dt);
 	PheromoneType getTarget();
 
-	Vector2d getPosition();
+	Vector2d& getPosition();
+	Vector2d& getVelocity();
+	Vector2d& getDesiredDir();
 };
 

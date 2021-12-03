@@ -11,14 +11,14 @@ namespace Config
 	const int frameRate = 30;
 
 	// Ant
-	const float wonderStrength(8.f);
-	const float streeringStrength(10.f);
-	const float radiusOfView(50.f);
+	const float wonderStrength(.2f);
+	const float streeringStrength(90.f);
+	const float radiusOfView(40.f);
 	const float antSize(8.f);
 
 	// Pheromones
-	const float pheromoneEvaporationRate(0.001);
-	const float pheromoneUpdateRate(0.01);
-	const int distanceStrength(3);
+	const float pheromoneEvaporationRate(0.0005);
+	const float pheromoneUpdateRate(0.09);
+	const int distanceStrength(2);
 	const int pheromoneStrength(5);
 }

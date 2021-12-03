@@ -15,7 +15,7 @@ int main()
 	window.setFramerateLimit(Config::frameRate);
 
 	std::vector<Ant::Pheromone> pheromones;
-	Ant ants[1];
+	Ant ants[10];
 
 	Vector2d food(100.f, 100.f);
 	sf::CircleShape foodShape(20);
@@ -45,14 +45,16 @@ int main()
 				}
 			}
 		}
-		// Update
+		// Time Update
 		float dt = global_clock.restart().asSeconds();
 
+		// Ants Update
 		for (Ant& a : ants)
 		{
 			a.update(pheromones, dt, pheromoneTimer.getElapsedTime().asSeconds(), food, home);
 		}
 
+		// Pheromone evaporation
 		if (pheromoneTimer.getElapsedTime().asSeconds() > Config::phUpdateTime)
 			pheromoneTimer.restart();
 
@@ -72,6 +74,12 @@ int main()
 		}
 		for (Ant& a : ants)
 		{
+			sf::Vertex line[] =
+			{
+				sf::Vertex(a.getPosition().asSFMLVector2f()),
+				sf::Vertex(a.getPosition().asSFMLVector2f() + a.getVelocity().asSFMLVector2f())
+			};
+			window.draw(line, 2, sf::Lines);
 			sf::CircleShape circle(5);
 			circle.setOrigin(5, 5);
 			circle.setPosition(a.getPosition().asSFMLVector2f());
