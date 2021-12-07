@@ -12,6 +12,7 @@ Ant::Ant(float maxSpeed) : speed(maxSpeed)
 
 	this->speed = maxSpeed;
 	this->target = TO_FOOD;
+	this->coveredDistance = 0;
 }
 
 // Methods
@@ -40,13 +41,14 @@ void Ant::update(std::vector<Pheromone>& pheromones, const float& dt, const floa
 		if (target != ph.type && dist < Config::antSize)
 		{
 			isAnyWithin = true;
-			ph.value += Config::pheromoneUpdateRate / (speed * dt);
+			ph.value += Config::pheromoneUpdateRate / coveredDistance;
+
 		}
 		if (target == ph.type && dist < Config::radiusOfView && dist > Config::antSize)
 		{
 			if (this->velocity.angleTo(this->position.VectorTo(ph.x, ph.y)) < 1.f)
 			{
-				oneProd = pow(dist, Config::distanceStrength) * pow(ph.value, Config::pheromoneStrength);
+				oneProd = pow(1/dist, Config::distanceStrength) * pow(ph.value, Config::pheromoneStrength);
 				productSum += oneProd;
 				product.push_back(oneProd);
 				phAroundId.push_back(cnt);
@@ -97,6 +99,7 @@ void Ant::move(const float& dt)
 	Vector2d acceleration = (desiredDir * speed - velocity).normalize() * Config::streeringStrength;
 	velocity = (velocity + acceleration * dt).normalize() * speed;
 	position += this->velocity * dt;
+	coveredDistance += speed * dt;
 
 	if (position.x > borders.x || position.x < 0)
 	{
@@ -142,8 +145,9 @@ bool Ant::findHomeFood(const Vector2d& foodPos, const Vector2d& homePos)
 			if (anyDist < Config::antSize)
 			{
 				this->target = TO_HOME;
-				this->velocity *= -1;
-				this->desiredDir *= -1;
+				/*this->velocity *= -1;
+				this->desiredDir *= -1;*/
+				this->coveredDistance = 0;
 			}
 			else
 				this->desiredDir = this->position.VectorTo(foodPos).normalize();
@@ -159,8 +163,9 @@ bool Ant::findHomeFood(const Vector2d& foodPos, const Vector2d& homePos)
 			if (anyDist < Config::antSize)
 			{
 				this->target = TO_FOOD;
-				this->velocity *= -1;
-				this->desiredDir *= -1;
+				/*this->velocity *= -1;
+				this->desiredDir *= -1;*/
+				this->coveredDistance = 0;
 			}
 			else
 				this->desiredDir = this->position.VectorTo(homePos).normalize();
@@ -173,7 +178,7 @@ bool Ant::findHomeFood(const Vector2d& foodPos, const Vector2d& homePos)
 void Ant::leavePheromone(std::vector<Pheromone>& ph)
 {
 	if (this->target == TO_FOOD)
-		ph.emplace_back(TO_HOME, 1.f, position.x, position.y);
+		ph.emplace_back(TO_HOME, Config::pheromoneLeaveRate / (Config::pheromoneLeaveRate + coveredDistance), position.x, position.y);
 	else
-		ph.emplace_back(TO_FOOD, 1.f, position.x, position.y);
+		ph.emplace_back(TO_FOOD, Config::pheromoneLeaveRate / (Config::pheromoneLeaveRate + coveredDistance), position.x, position.y);
 }

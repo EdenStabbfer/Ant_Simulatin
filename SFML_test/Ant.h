@@ -32,6 +32,7 @@ private:
 	Vector2d velocity;
 	Vector2d borders;
 	float speed;
+	float coveredDistance;
 
 	PheromoneType target;
 

@@ -15,7 +15,7 @@ int main()
 	window.setFramerateLimit(Config::frameRate);
 
 	std::vector<Ant::Pheromone> pheromones;
-	Ant ants[10];
+	Ant ants[30];
 
 	Vector2d food(100.f, 100.f);
 	sf::CircleShape foodShape(20);
@@ -58,7 +58,7 @@ int main()
 		if (pheromoneTimer.getElapsedTime().asSeconds() > Config::phUpdateTime)
 			pheromoneTimer.restart();
 
-		// Draw
+		// draw
 		window.clear(sf::Color(0, 0, 0));
 
 		for (auto& ph : pheromones)
@@ -66,20 +66,23 @@ int main()
 			sf::CircleShape c(1);
 			c.setPosition(ph.x, ph.y);
 			if (ph.type == Ant::TO_HOME)
-				c.setFillColor(sf::Color(0, 0, 255, static_cast<int>(min(ph.value, 1.f)*255)));
+				c.setFillColor(sf::Color(0, 0, 255, static_cast<int>(min(ph.value, 1.f) * 255)));
 			else
 				c.setFillColor(sf::Color(255, 0, 0, static_cast<int>(min(ph.value, 1.f) * 255)));
 			window.draw(c);
-			ph.value *= 1 - Config::pheromoneEvaporationRate;
+			ph.value *= (1.f - Config::pheromoneEvaporationRate);
+			auto iter = std::find_if(pheromones.begin(), pheromones.end(), [&](const auto& ph) {return ph.value < Config::pheromoneMinValue; });
+			if (iter != pheromones.end())
+				pheromones.erase(iter);
 		}
 		for (Ant& a : ants)
 		{
-			sf::Vertex line[] =
+			/*sf::Vertex line[] =
 			{
 				sf::Vertex(a.getPosition().asSFMLVector2f()),
 				sf::Vertex(a.getPosition().asSFMLVector2f() + a.getVelocity().asSFMLVector2f())
 			};
-			window.draw(line, 2, sf::Lines);
+			window.draw(line, 2, sf::Lines);*/
 			sf::CircleShape circle(5);
 			circle.setOrigin(5, 5);
 			circle.setPosition(a.getPosition().asSFMLVector2f());
