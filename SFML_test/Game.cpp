@@ -1,9 +1,5 @@
 #include "Ant.h"
 
-float min(float a, float b)
-{
-	return (a <= b) ? a : b;
-}
 
 int main()
 {
@@ -15,7 +11,13 @@ int main()
 	window.setFramerateLimit(Config::frameRate);
 
 	std::vector<Ant::Pheromone> pheromones;
-	Ant ants[30];
+
+	Ant ants[Config::antNumber];
+	for (auto& a : ants)
+		a = Ant(&pheromones, Config::maxSpeed);
+	sf::CircleShape antShape(3);
+	antShape.setOrigin(3, 3);
+	antShape.setFillColor(sf::Color(20, 210, 60));
 
 	Vector2d food(100.f, 100.f);
 	sf::CircleShape foodShape(20);
@@ -51,7 +53,7 @@ int main()
 		// Ants Update
 		for (Ant& a : ants)
 		{
-			a.update(pheromones, dt, pheromoneTimer.getElapsedTime().asSeconds(), food, home);
+			a.update(dt, pheromoneTimer.getElapsedTime().asSeconds(), food, home);
 		}
 
 		// Pheromone evaporation
@@ -64,7 +66,7 @@ int main()
 		for (auto& ph : pheromones)
 		{
 			sf::CircleShape c(1);
-			c.setPosition(ph.x, ph.y);
+			c.setPosition(ph.position.asSFMLVector2f());
 			if (ph.type == Ant::TO_HOME)
 				c.setFillColor(sf::Color(0, 0, 255, static_cast<int>(min(ph.value, 1.f) * 255)));
 			else
@@ -83,11 +85,8 @@ int main()
 				sf::Vertex(a.getPosition().asSFMLVector2f() + a.getVelocity().asSFMLVector2f())
 			};
 			window.draw(line, 2, sf::Lines);*/
-			sf::CircleShape circle(5);
-			circle.setOrigin(5, 5);
-			circle.setPosition(a.getPosition().asSFMLVector2f());
-			circle.setFillColor(sf::Color(0, 255, 0, 255));
-			window.draw(circle);
+			antShape.setPosition(a.getPosition().asSFMLVector2f());
+			window.draw(antShape);
 		}
 		window.draw(foodShape);
 		window.draw(homeShape);

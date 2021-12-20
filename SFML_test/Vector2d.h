@@ -34,13 +34,13 @@ public:
 	float length();
 
 	float distanceTo(const Vector2d& v);
-	float distanceTo(float x, float y);
+	float sqDistanceTo(const Vector2d& v);
 
 	Vector2d VectorTo(const Vector2d& v);
-	Vector2d VectorTo(float x, float y);
 
 	float angleTo(const Vector2d& v);
-	float angleTo(float x, float y);
+
+	float diamondAngleTo(const Vector2d& v);
 
 	Vector2d& normalize();
 

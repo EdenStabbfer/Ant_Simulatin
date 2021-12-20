@@ -2,17 +2,23 @@
 
 #include "Ant.h"
 
+static std::random_device rd;
+static std::mt19937 gen(rd());
+static std::uniform_real_distribution<> uid(0, 1);
+
+static std::vector<int> phAroundId;
+static std::vector<float> product;
+
 // Initialization
-Ant::Ant(float maxSpeed) : speed(maxSpeed)
+Ant::Ant(std::vector<Ant::Pheromone>* pheromones, float maxSpeed) : pheromones(pheromones), speed(maxSpeed)
 {
 	this->position = Vector2d(Config::width / 2, Config::height / 2);
 	this->desiredDir = randomVectorInCircle();
 	this->velocity = desiredDir * maxSpeed;
-	this->borders = Vector2d(Config::width, Config::height);
 
-	this->speed = maxSpeed;
-	this->target = TO_FOOD;
 	this->coveredDistance = 0;
+
+	this->target = TO_FOOD;
 }
 
 // Methods
@@ -21,34 +27,33 @@ void Ant::chooseDesiredDirection()
 	desiredDir = (desiredDir + randomVectorInCircle() * Config::wonderStrength).normalize();
 }
 
-void Ant::update(std::vector<Pheromone>& pheromones, const float& dt, const float& pherDt, const Vector2d& foodPos, const Vector2d& homePos)
+void Ant::update(const float& dt, const float& pherDt, const Vector2d& foodPos, const Vector2d& homePos)
 {
-	std::vector<int> phAroundId;
-	std::vector<float> product;
-
 	// Проверяем достигли ли дома или еды. Если да, меняем направление и возвращаем true,  иначе - false
 	bool homeFoodFound = findHomeFood(foodPos, homePos);
 
-	// Считаем компоненты вероятности для феромонов и обновляем его, если в радиусе муравья
+	int cnt(0);
 	float productSum(0);
 	float oneProd(0);
-	bool isAnyWithin(false);
-	int cnt(0);
-	float dist(0);
-	for (auto& ph : pheromones)
+	float sqDist(0);
+	bool isPheromoneUnder(false);
+	// Пробегаемся по всем феромонам
+	for (auto& ph : *this->pheromones)
 	{
-		dist = position.distanceTo(ph.x, ph.y);
-		if (target != ph.type && dist < Config::antSize)
+		sqDist = position.sqDistanceTo(ph.position);
+		// Если феромон под муравьём, обновляем его значение
+		if (this->target != ph.type && sqDist < Config::sqAntSize)
 		{
-			isAnyWithin = true;
-			ph.value += Config::pheromoneUpdateRate / coveredDistance;
-
+			isPheromoneUnder = true;
+			ph.value = min(1.f, Config::pheromoneUpdateRate / this->coveredDistance + ph.value);
 		}
-		if (target == ph.type && dist < Config::radiusOfView && dist > Config::antSize)
+		// Если расстояние до феромона меньше радиуса видимости, но больше размера муравья,
+		if (!homeFoodFound && this->target == ph.type && sqDist < Config::sqRadiusOfView && sqDist > Config::sqAntSize)
 		{
-			if (this->velocity.angleTo(this->position.VectorTo(ph.x, ph.y)) < 1.f)
+			// И если угол видимости меньше заданного, то выбираем эту точку 
+			if (this->velocity.angleTo(this->position.VectorTo(ph.position)) < Config::visionAngle)
 			{
-				oneProd = pow(1/dist, Config::distanceStrength) * pow(ph.value, Config::pheromoneStrength);
+				oneProd = pow(1/sqrt(sqDist), Config::distanceStrength) * pow(ph.value, Config::pheromoneStrength);
 				productSum += oneProd;
 				product.push_back(oneProd);
 				phAroundId.push_back(cnt);
@@ -58,15 +63,10 @@ void Ant::update(std::vector<Pheromone>& pheromones, const float& dt, const floa
 	}
 
 	// Оставляем новую порцию феромона, если поблизости нет других и истёк таймер
-	if (!isAnyWithin && pherDt > Config::phUpdateTime)
-	{
-		leavePheromone(pheromones);
-	}
+	if (!isPheromoneUnder && pherDt > Config::phUpdateTime)
+		leavePheromone();
 	
 	// Выбираем направление
-	static std::random_device rd;
-	static std::mt19937 gen(rd());
-	static std::uniform_real_distribution<> uid(0, 1);
 	if (!homeFoodFound)
 	{
 		if (!product.empty())
@@ -78,7 +78,7 @@ void Ant::update(std::vector<Pheromone>& pheromones, const float& dt, const floa
 				prob += product.at(i) / productSum;
 				if (chance <= prob)
 				{
-					this->desiredDir = this->position.VectorTo(pheromones.at(phAroundId.at(i)).x, pheromones.at(phAroundId.at(i)).y).normalize();
+					this->desiredDir = this->position.VectorTo(this->pheromones->at(phAroundId.at(i)).position).normalize();
 					break;
 				}
 			}
@@ -95,22 +95,74 @@ void Ant::update(std::vector<Pheromone>& pheromones, const float& dt, const floa
 }
 
 void Ant::move(const float& dt)
-{	
+{
 	Vector2d acceleration = (desiredDir * speed - velocity).normalize() * Config::streeringStrength;
 	velocity = (velocity + acceleration * dt).normalize() * speed;
 	position += this->velocity * dt;
 	coveredDistance += speed * dt;
 
-	if (position.x > borders.x || position.x < 0)
+	if (position.x > Config::width)
+		position.x -= Config::width;
+	else if (position.x < 0)
+		position.x = Config::width - position.x;
+	if (position.y > Config::height)
+		position.y -= Config::height;
+	else if (position.y < 0)
+		position.y = Config::height - position.y;
+}
+
+bool Ant::findHomeFood(const Vector2d& foodPos, const Vector2d& homePos)
+{
+	float sqDist(0);
+	if (this->target == TO_FOOD)
 	{
-		desiredDir.x *= -1;
-		velocity.x *= -1;
+		sqDist = this->position.sqDistanceTo(foodPos);
+		if (sqDist < Config::sqRadiusOfView)
+		{
+			if (sqDist < Config::sqAntSize)
+			{
+				this->target = TO_HOME;
+				if (Config::turnOnTarget)
+				{
+					this->velocity *= -1;
+					this->desiredDir *= -1;
+				}
+				this->coveredDistance = 0;
+			}
+			else
+				this->desiredDir = this->position.VectorTo(foodPos).normalize();
+			return true;
+		}
 	}
-	if (position.y > borders.y || position.y < 0)
+	else // this->target == TO_HOME
 	{
-		desiredDir.y *= -1;
-		velocity.y *= -1;
+		sqDist = this->position.sqDistanceTo(homePos);
+		if (sqDist < Config::sqRadiusOfView)
+		{
+			if (sqDist < Config::sqAntSize)
+			{
+				this->target = TO_FOOD;
+				if (Config::turnOnTarget)
+				{
+					this->velocity *= -1;
+					this->desiredDir *= -1;
+				}
+				this->coveredDistance = 0;
+			}
+			else
+				this->desiredDir = this->position.VectorTo(homePos).normalize();
+			return true;
+		}
 	}
+	return false;
+}
+
+void Ant::leavePheromone()
+{
+	if (this->target == TO_FOOD)
+		this->pheromones->emplace_back(TO_HOME, Config::pheromoneLeaveRate / (Config::pheromoneLeaveRate + coveredDistance), this->position);
+	else
+		this->pheromones->emplace_back(TO_FOOD, Config::pheromoneLeaveRate / (Config::pheromoneLeaveRate + coveredDistance), this->position);
 }
 
 Ant::PheromoneType Ant::getTarget()
@@ -131,54 +183,4 @@ Vector2d& Ant::getVelocity()
 Vector2d& Ant::getDesiredDir()
 {
 	return this->desiredDir;
-}
-
-bool Ant::findHomeFood(const Vector2d& foodPos, const Vector2d& homePos)
-{
-	float anyDist(0);
-	if (this->target == TO_FOOD)
-	{
-		anyDist = this->position.distanceTo(foodPos);
-		if (anyDist < Config::radiusOfView)
-		{
-			//std::cout << "food\n";
-			if (anyDist < Config::antSize)
-			{
-				this->target = TO_HOME;
-				/*this->velocity *= -1;
-				this->desiredDir *= -1;*/
-				this->coveredDistance = 0;
-			}
-			else
-				this->desiredDir = this->position.VectorTo(foodPos).normalize();
-			return true;
-		}
-	}
-	else // this->target == TO_HOME
-	{
-		anyDist = this->position.distanceTo(homePos);
-		if (anyDist < Config::radiusOfView)
-		{
-			//std::cout << "home\n";
-			if (anyDist < Config::antSize)
-			{
-				this->target = TO_FOOD;
-				/*this->velocity *= -1;
-				this->desiredDir *= -1;*/
-				this->coveredDistance = 0;
-			}
-			else
-				this->desiredDir = this->position.VectorTo(homePos).normalize();
-			return true;
-		}
-	}
-	return false;
-}
-
-void Ant::leavePheromone(std::vector<Pheromone>& ph)
-{
-	if (this->target == TO_FOOD)
-		ph.emplace_back(TO_HOME, Config::pheromoneLeaveRate / (Config::pheromoneLeaveRate + coveredDistance), position.x, position.y);
-	else
-		ph.emplace_back(TO_FOOD, Config::pheromoneLeaveRate / (Config::pheromoneLeaveRate + coveredDistance), position.x, position.y);
 }

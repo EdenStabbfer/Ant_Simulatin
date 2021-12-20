@@ -86,14 +86,9 @@ float Vector2d::distanceTo(const Vector2d& v)
 	return sqrt(pow(v.x - this->x, 2) + pow(v.y - this->y, 2));
 }
 
-float Vector2d::distanceTo(float x, float y)
+float Vector2d::sqDistanceTo(const Vector2d& v)
 {
-	return sqrt(pow(x - this->x, 2) + pow(y - this->y, 2));
-}
-
-Vector2d Vector2d::VectorTo(float x, float y)
-{
-	return Vector2d(x - this->x, y - this->y);
+	return (v.x - this->x)*(v.x - this->x) + (v.y - this->y)*(v.y - this->y);
 }
 
 Vector2d Vector2d::VectorTo(const Vector2d& v)
@@ -109,7 +104,7 @@ float Vector2d::angleTo(const Vector2d& v)
 	return acos(t);
 }
 
-float Vector2d::angleTo(float x, float y)
+float Vector2d::diamondAngleTo(const Vector2d& v)
 {
 	float t = (x * this->x + y * this->y) / sqrt(this->x * this->x + this->y * this->y) / sqrt(x * x + y * y);
 	if (t < -1) t = -1;

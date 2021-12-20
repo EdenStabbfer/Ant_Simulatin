@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Vector2d.h"
+#include "Math.h"
 #include "Config.h"
 
 
 class Ant
 {
 public:
-	Ant(float maxSpeed = 45.f);
-
 	enum PheromoneType
 	{
 		TO_HOME,
@@ -19,29 +18,32 @@ public:
 	{
 		PheromoneType type;
 		float value;
-		float x;
-		float y;
+		Vector2d position;
 
-		Pheromone(PheromoneType p_type, float p_value, float p_x, float p_y) :
-			type(p_type), value(p_value), x(p_x), y(p_y){}
+		Pheromone(PheromoneType p_type, float p_value, Vector2d p_position) :
+			type(p_type), value(p_value), position(p_position){}
 	};
 
 private:
 	Vector2d position;
 	Vector2d desiredDir;
 	Vector2d velocity;
-	Vector2d borders;
+
 	float speed;
 	float coveredDistance;
 
 	PheromoneType target;
 
+	std::vector<Pheromone>* pheromones;
+
 	void chooseDesiredDirection();
-	void leavePheromone(std::vector<Pheromone>& ph);
+	void leavePheromone();
 	bool findHomeFood(const Vector2d& foodPos, const Vector2d& homePos);
 
 public:
-	void update(std::vector<Pheromone>& ph, const float& dt, const float& pherDt, const Vector2d& foodPos, const Vector2d& homePos);
+	Ant(std::vector<Ant::Pheromone>* pheromones = nullptr, float maxSpeed = 1);
+
+	void update(const float& dt, const float& pherDt, const Vector2d& foodPos, const Vector2d& homePos);
 	void move(const float& dt);
 	PheromoneType getTarget();
 
