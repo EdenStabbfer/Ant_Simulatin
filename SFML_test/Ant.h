@@ -28,6 +28,7 @@ private:
 	Vector2d position;
 	Vector2d desiredDir;
 	Vector2d velocity;
+	std::vector<std::pair<sf::Vector2f, sf::Vector2f>>* borders;
 
 	float speed;
 	float coveredDistance;
@@ -41,7 +42,7 @@ private:
 	bool findHomeFood(const Vector2d& foodPos, const Vector2d& homePos);
 
 public:
-	Ant(std::vector<Ant::Pheromone>* pheromones = nullptr, float maxSpeed = 1);
+	Ant(std::vector<Ant::Pheromone>* pheromones = nullptr, std::vector<std::pair<sf::Vector2f, sf::Vector2f>>* borders = nullptr, float maxSpeed = 1);
 
 	void update(const float& dt, const float& pherDt, const Vector2d& foodPos, const Vector2d& homePos);
 	void move(const float& dt);

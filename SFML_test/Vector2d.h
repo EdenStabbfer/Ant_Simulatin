@@ -37,6 +37,7 @@ public:
 	float sqDistanceTo(const Vector2d& v);
 
 	Vector2d VectorTo(const Vector2d& v);
+	Vector2d VectorTo(const sf::Vector2f& v);
 
 	float angleTo(const Vector2d& v);
 
@@ -45,6 +46,7 @@ public:
 	Vector2d& normalize();
 
 	float dot(Vector2d& v);
+	float cross(Vector2d& v);
 
 	sf::Vector2f asSFMLVector2f();
 

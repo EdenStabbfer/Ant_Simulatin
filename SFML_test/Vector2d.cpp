@@ -96,6 +96,11 @@ Vector2d Vector2d::VectorTo(const Vector2d& v)
 	return Vector2d(v.x - this->x, v.y - this->y);
 }
 
+Vector2d Vector2d::VectorTo(const sf::Vector2f& v)
+{
+	return Vector2d(v.x - this->x, v.y - this->y);
+}
+
 float Vector2d::angleTo(const Vector2d& v)
 {
 	float t = (v.x * this->x + v.y * this->y) / this->length() / sqrt(v.x * v.x + v.y * v.y);
@@ -123,6 +128,11 @@ Vector2d& Vector2d::normalize()
 float Vector2d::dot(Vector2d& v)
 {
 	return this->x * v.x + this->y * v.y;
+}
+
+float Vector2d::cross(Vector2d& v)
+{
+	return this->x * v.y - v.x * this->y;
 }
 
 sf::Vector2f Vector2d::asSFMLVector2f()

@@ -10,11 +10,12 @@ static std::vector<int> phAroundId;
 static std::vector<float> product;
 
 // Initialization
-Ant::Ant(std::vector<Ant::Pheromone>* pheromones, float maxSpeed) : pheromones(pheromones), speed(maxSpeed)
+Ant::Ant(std::vector<Ant::Pheromone>* pheromones, std::vector<std::pair<sf::Vector2f, sf::Vector2f>>* borders, float maxSpeed) : pheromones(pheromones), speed(maxSpeed)
 {
 	this->position = Vector2d(Config::width / 2, Config::height / 2);
 	this->desiredDir = randomVectorInCircle();
 	this->velocity = desiredDir * maxSpeed;
+	this->borders = borders;
 
 	this->coveredDistance = 0;
 
@@ -101,14 +102,37 @@ void Ant::move(const float& dt)
 	position += this->velocity * dt;
 	coveredDistance += speed * dt;
 
-	if (position.x > Config::width)
-		position.x -= Config::width;
-	else if (position.x < 0)
-		position.x = Config::width - position.x;
-	if (position.y > Config::height)
-		position.y -= Config::height;
-	else if (position.y < 0)
-		position.y = Config::height - position.y;
+	if (position.x > Config::width || position.x < 0)
+	{
+		this->desiredDir.x *= -1;
+		this->velocity.x *= -1;
+	}
+	if (position.y > Config::height || position.y < 0)
+	{
+		this->desiredDir.y *= -1;
+		this->velocity.y *= -1;
+	}
+	// Коллизии
+	Vector2d left, right;
+	float A, B, dist;
+	for (auto& pair : *this->borders)
+	{
+		left = this->position.VectorTo(pair.first);
+		right = this->position.VectorTo(pair.second);
+		if (sign(this->velocity.cross(left)) != sign(this->velocity.cross(right)))
+		{
+			left = this->position + left;
+			right = this->position + right;
+			A = right.y - left.y;
+			B = left.x - right.x;
+			dist = abs(this->position.x * A + this->position.y * B + left.y * right.x - right.y * left.x) / sqrt(A*A + B*B);
+			if (dist < this->speed * dt)
+			{	
+				this->velocity *= -1;
+				this->desiredDir *= -1;
+			}
+		}
+	}
 }
 
 bool Ant::findHomeFood(const Vector2d& foodPos, const Vector2d& homePos)

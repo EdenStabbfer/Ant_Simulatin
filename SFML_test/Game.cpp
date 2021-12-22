@@ -3,6 +3,7 @@
 
 int main()
 {
+	// Cлужебное
 	sf::RenderWindow window(sf::VideoMode(Config::width, Config::height), "Crazy Ants");
 	sf::Event event;
 	sf::Clock global_clock;
@@ -10,11 +11,14 @@ int main()
 
 	window.setFramerateLimit(Config::frameRate);
 
+	// Хранение объектов
 	std::vector<Ant::Pheromone> pheromones;
-
+	std::vector<std::pair<sf::Vector2f, sf::Vector2f>> borders;
 	Ant ants[Config::antNumber];
 	for (auto& a : ants)
-		a = Ant(&pheromones, Config::maxSpeed);
+		a = Ant(&pheromones, &borders, Config::maxSpeed);
+
+	// Фигуры
 	sf::CircleShape antShape(3);
 	antShape.setOrigin(3, 3);
 	antShape.setFillColor(sf::Color(20, 210, 60));
@@ -31,6 +35,9 @@ int main()
 	homeShape.setFillColor(sf::Color(255, 0, 0));
 	homeShape.setPosition(home.asSFMLVector2f());
 
+	bool startLine(false);
+
+	// Главный цикл
 	while (window.isOpen())
 	{
 		while (window.pollEvent(event))
@@ -45,8 +52,23 @@ int main()
 					food.y = event.mouseButton.y;
 					foodShape.setPosition(event.mouseButton.x, event.mouseButton.y);
 				}
+				if (event.mouseButton.button == sf::Mouse::Right)
+				{
+					if (!startLine)
+					{
+						startLine = true;
+						borders.emplace_back(sf::Vector2f(event.mouseButton.x, event.mouseButton.y), sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
+					}
+					else
+						startLine = false;
+				}
 			}
 		}
+
+		if (startLine)
+			borders.back().first = sf::Vector2f(sf::Mouse::getPosition(window));
+
+
 		// Time Update
 		float dt = global_clock.restart().asSeconds();
 
@@ -87,6 +109,11 @@ int main()
 			window.draw(line, 2, sf::Lines);*/
 			antShape.setPosition(a.getPosition().asSFMLVector2f());
 			window.draw(antShape);
+		}
+		for (auto& pair : borders)
+		{
+			sf::Vertex line[]{sf::Vertex(pair.first), sf::Vertex(pair.second)};
+			window.draw(line, 3, sf::Lines);
 		}
 		window.draw(foodShape);
 		window.draw(homeShape);
